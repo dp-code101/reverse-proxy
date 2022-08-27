@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace Yarp.ReverseProxy.Utilities;
 
-internal sealed class AtomicCounter
+internal sealed class AtomicCounter : IConcurrencyCounter
 {
     private int _value;
 

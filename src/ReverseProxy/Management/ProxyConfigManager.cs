@@ -21,6 +21,7 @@ using Yarp.ReverseProxy.Health;
 using Yarp.ReverseProxy.Model;
 using Yarp.ReverseProxy.Routing;
 using Yarp.ReverseProxy.Transforms.Builder;
+using Yarp.ReverseProxy.Utilities;
 
 namespace Yarp.ReverseProxy.Management;
 
@@ -50,6 +51,8 @@ internal sealed class ProxyConfigManager : EndpointDataSource, IProxyStateLookup
     private readonly IActiveHealthCheckMonitor _activeHealthCheckMonitor;
     private readonly IClusterDestinationsUpdater _clusterDestinationsUpdater;
     private readonly IConfigChangeListener[] _configChangeListeners;
+    private readonly IConcurrencyCounterFactory _concurrencyCounterFactory;
+
     private List<Endpoint>? _endpoints;
     private CancellationTokenSource _endpointsChangeSource = new();
     private IChangeToken _endpointsChangeToken;
@@ -67,7 +70,8 @@ internal sealed class ProxyConfigManager : EndpointDataSource, IProxyStateLookup
         IForwarderHttpClientFactory httpClientFactory,
         IActiveHealthCheckMonitor activeHealthCheckMonitor,
         IClusterDestinationsUpdater clusterDestinationsUpdater,
-        IEnumerable<IConfigChangeListener> configChangeListeners)
+        IEnumerable<IConfigChangeListener> configChangeListeners,
+        IConcurrencyCounterFactory concurrencyCounterFactory)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _providers = providers?.ToArray() ?? throw new ArgumentNullException(nameof(providers));
@@ -80,6 +84,7 @@ internal sealed class ProxyConfigManager : EndpointDataSource, IProxyStateLookup
         _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         _activeHealthCheckMonitor = activeHealthCheckMonitor ?? throw new ArgumentNullException(nameof(activeHealthCheckMonitor));
         _clusterDestinationsUpdater = clusterDestinationsUpdater ?? throw new ArgumentNullException(nameof(clusterDestinationsUpdater));
+        _concurrencyCounterFactory = concurrencyCounterFactory;
 
         _configChangeListeners = configChangeListeners?.ToArray() ?? Array.Empty<IConfigChangeListener>();
 
@@ -518,7 +523,7 @@ internal sealed class ProxyConfigManager : EndpointDataSource, IProxyStateLookup
             }
             else
             {
-                var newClusterState = new ClusterState(incomingCluster.ClusterId);
+                var newClusterState = new ClusterState(incomingCluster.ClusterId, _concurrencyCounterFactory.CreateCounter(incomingCluster.ClusterId));
 
                 UpdateRuntimeDestinations(incomingCluster.Destinations, newClusterState.Destinations);
 
@@ -592,7 +597,7 @@ internal sealed class ProxyConfigManager : EndpointDataSource, IProxyStateLookup
                 else
                 {
                     Log.DestinationAdded(_logger, incomingDestination.Key);
-                    var newDestination = new DestinationState(incomingDestination.Key)
+                    var newDestination = new DestinationState(incomingDestination.Key, _concurrencyCounterFactory.CreateCounter(incomingDestination.Key))
                     {
                         Model = new DestinationModel(incomingDestination.Value),
                     };

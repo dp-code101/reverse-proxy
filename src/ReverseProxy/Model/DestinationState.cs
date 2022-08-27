@@ -19,13 +19,23 @@ public sealed class DestinationState : IReadOnlyList<DestinationState>
     /// Creates a new instance. This constructor is for tests and infrastructure, this type is normally constructed by
     /// the configuration loading infrastructure.
     /// </summary>
-    public DestinationState(string destinationId)
+    public DestinationState(string destinationId) : this(destinationId, ConcurrencyCounterFactory.Shared.CreateCounter(destinationId))
+    {
+    }
+
+    /// <summary>
+    /// Creates a new instance. This constructor is for tests and infrastructure, this type is normally constructed by
+    /// the configuration loading infrastructure.
+    /// </summary>
+    public DestinationState(string destinationId, IConcurrencyCounter concurrencyCounter)
     {
         if (string.IsNullOrEmpty(destinationId))
         {
             throw new ArgumentNullException(nameof(destinationId));
         }
+
         DestinationId = destinationId;
+        ConcurrencyCounter = concurrencyCounter ?? throw new ArgumentNullException(nameof(concurrencyCounter));
     }
 
     /// <summary>
@@ -57,7 +67,7 @@ public sealed class DestinationState : IReadOnlyList<DestinationState>
         set => ConcurrencyCounter.Value = value;
     }
 
-    internal AtomicCounter ConcurrencyCounter { get; } = new AtomicCounter();
+    internal IConcurrencyCounter ConcurrencyCounter { get; }
 
     DestinationState IReadOnlyList<DestinationState>.this[int index]
         => index == 0 ? this : throw new IndexOutOfRangeException();

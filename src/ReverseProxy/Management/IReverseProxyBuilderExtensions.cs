@@ -32,6 +32,7 @@ internal static class IReverseProxyBuilderExtensions
         builder.AddTransformFactory<ResponseTransformFactory>();
         builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<MatcherPolicy, HeaderMatcherPolicy>());
         builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<MatcherPolicy, QueryParameterMatcherPolicy>());
+        builder.Services.TryAddSingleton<IConcurrencyCounterFactory, ConcurrencyCounterFactory>();
         return builder;
     }
 

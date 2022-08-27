@@ -19,9 +19,18 @@ public sealed class ClusterState
     /// Creates a new instance. This constructor is for tests and infrastructure, this type is normally constructed by the configuration
     /// loading infrastructure.
     /// </summary>
-    public ClusterState(string clusterId)
+    public ClusterState(string clusterId) : this(clusterId, ConcurrencyCounterFactory.Shared.CreateCounter(clusterId))
+    {
+    }
+
+    /// <summary>
+    /// Creates a new instance. This constructor is for tests and infrastructure, this type is normally constructed by the configuration
+    /// loading infrastructure.
+    /// </summary>
+    public ClusterState(string clusterId, IConcurrencyCounter concurrencyCounter)
     {
         ClusterId = clusterId ?? throw new ArgumentNullException(nameof(clusterId));
+        ConcurrencyCounter = concurrencyCounter ?? throw new ArgumentNullException(nameof(concurrencyCounter));
     }
 
     /// <summary>
@@ -58,7 +67,7 @@ public sealed class ClusterState
     /// <summary>
     /// Keeps track of the total number of concurrent requests on this cluster.
     /// </summary>
-    internal AtomicCounter ConcurrencyCounter { get; } = new AtomicCounter();
+    internal IConcurrencyCounter ConcurrencyCounter { get; }
 
     /// <summary>
     /// Tracks changes to the cluster configuration for use with rebuilding dependent endpoints. Destination changes do not affect this property.
