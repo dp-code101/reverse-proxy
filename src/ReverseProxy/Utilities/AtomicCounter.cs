@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace Yarp.ReverseProxy.Utilities;
 
-internal sealed class AtomicCounter
+public sealed class AtomicCounter
 {
     private int _value;
 

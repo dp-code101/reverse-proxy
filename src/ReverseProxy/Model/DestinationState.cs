@@ -57,7 +57,7 @@ public sealed class DestinationState : IReadOnlyList<DestinationState>
         set => ConcurrencyCounter.Value = value;
     }
 
-    internal AtomicCounter ConcurrencyCounter { get; } = new AtomicCounter();
+    public AtomicCounter ConcurrencyCounter { get; } = new AtomicCounter();
 
     DestinationState IReadOnlyList<DestinationState>.this[int index]
         => index == 0 ? this : throw new IndexOutOfRangeException();

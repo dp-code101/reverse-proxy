@@ -58,7 +58,7 @@ public sealed class ClusterState
     /// <summary>
     /// Keeps track of the total number of concurrent requests on this cluster.
     /// </summary>
-    internal AtomicCounter ConcurrencyCounter { get; } = new AtomicCounter();
+    public AtomicCounter ConcurrencyCounter { get; } = new AtomicCounter();
 
     /// <summary>
     /// Tracks changes to the cluster configuration for use with rebuilding dependent endpoints. Destination changes do not affect this property.
