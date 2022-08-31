@@ -86,6 +86,38 @@ public class ForwarderMiddlewareTests : TestAutoMockBase
                 })
             .Verifiable();
 
+        Mock<IForwarderRequestCounter>()
+            .Setup(h => h.Increment(cluster1, destination1))
+            .Callback(() =>
+            {
+                cluster1.ConcurrencyCounter.Increment();
+                destination1.ConcurrencyCounter.Increment();
+            });
+
+        Mock<IForwarderRequestCounter>()
+            .Setup(h => h.Decrement(destination1, cluster1))
+            .Callback(() =>
+            {
+                destination1.ConcurrencyCounter.Decrement();
+                cluster1.ConcurrencyCounter.Decrement();
+            });
+
+        Mock<IForwarderRequestCounter>()
+            .Setup(h => h.Increment(cluster1, destination1))
+            .Callback(() =>
+            {
+                cluster1.ConcurrencyCounter.Increment();
+                destination1.ConcurrencyCounter.Increment();
+            });
+
+        Mock<IForwarderRequestCounter>()
+            .Setup(h => h.Decrement(destination1, cluster1))
+            .Callback(() =>
+            {
+                destination1.ConcurrencyCounter.Decrement();
+                cluster1.ConcurrencyCounter.Decrement();
+            });
+
         var sut = Create<ForwarderMiddleware>();
 
         Assert.Equal(0, cluster1.ConcurrencyCounter.Value);
@@ -149,6 +181,14 @@ public class ForwarderMiddlewareTests : TestAutoMockBase
                 It.IsAny<ForwarderRequestConfig>(),
                 It.IsAny<HttpTransformer>()))
             .Returns(() => throw new NotImplementedException());
+
+        Mock<IForwarderRequestCounter>()
+            .Setup(h => h.Increment(cluster1, It.IsAny<DestinationState>()))
+            .Callback(() => cluster1.ConcurrencyCounter.Increment());
+
+        Mock<IForwarderRequestCounter>()
+            .Setup(h => h.Decrement(It.IsAny<DestinationState>(), cluster1))
+            .Callback(() => cluster1.ConcurrencyCounter.Decrement());
 
         var sut = Create<ForwarderMiddleware>();
 

@@ -16,16 +16,18 @@ namespace Yarp.ReverseProxy.Forwarder;
 internal sealed class ForwarderMiddleware
 {
     private readonly IRandomFactory _randomFactory;
+    private readonly IForwarderRequestCounter _requestCounter;
     private readonly RequestDelegate _next; // Unused, this middleware is always terminal
     private readonly ILogger _logger;
     private readonly IHttpForwarder _forwarder;
 
-    public ForwarderMiddleware(RequestDelegate next, ILogger<ForwarderMiddleware> logger, IHttpForwarder forwarder, IRandomFactory randomFactory)
+    public ForwarderMiddleware(RequestDelegate next, ILogger<ForwarderMiddleware> logger, IHttpForwarder forwarder, IRandomFactory randomFactory, IForwarderRequestCounter requestCounter)
     {
         _next = next ?? throw new ArgumentNullException(nameof(next));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _forwarder = forwarder ?? throw new ArgumentNullException(nameof(forwarder));
         _randomFactory = randomFactory ?? throw new ArgumentNullException(nameof(randomFactory));
+        _requestCounter = requestCounter;
     }
 
     /// <inheritdoc/>
@@ -66,8 +68,7 @@ internal sealed class ForwarderMiddleware
 
         try
         {
-            cluster.ConcurrencyCounter.Increment();
-            destination.ConcurrencyCounter.Increment();
+            _requestCounter.Increment(cluster, destination);
 
             ForwarderTelemetry.Log.ForwarderInvoke(cluster.ClusterId, route.Config.RouteId, destination.DestinationId);
 
@@ -77,8 +78,7 @@ internal sealed class ForwarderMiddleware
         }
         finally
         {
-            destination.ConcurrencyCounter.Decrement();
-            cluster.ConcurrencyCounter.Decrement();
+            _requestCounter.Decrement(destination, cluster);
         }
     }
 
