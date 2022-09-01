@@ -8,11 +8,11 @@ using Yarp.Kubernetes.Controller.Caching;
 
 namespace Yarp.Kubernetes.Controller.Converters;
 
-internal static class YarpParser
+public static class YarpParser
 {
     private static readonly Deserializer YamlDeserializer = new();
 
-    internal static void ConvertFromKubernetesIngress(YarpIngressContext ingressContext, YarpConfigContext configContext)
+    public static void ConvertFromKubernetesIngress(YarpIngressContext ingressContext, YarpConfigContext configContext)
     {
         var spec = ingressContext.Ingress.Spec;
         var defaultBackend = spec?.DefaultBackend;

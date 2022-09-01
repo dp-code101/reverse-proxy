@@ -6,7 +6,7 @@ using Yarp.Kubernetes.Controller.Caching;
 
 namespace Yarp.Kubernetes.Controller.Converters;
 
-internal sealed class YarpIngressContext
+public sealed class YarpIngressContext
 {
     public YarpIngressContext(IngressData ingress, List<ServiceData> services, List<Endpoints> endpoints)
     {

@@ -6,7 +6,7 @@ using Yarp.ReverseProxy.Configuration;
 
 namespace Yarp.Kubernetes.Controller.Converters;
 
-internal sealed class YarpIngressOptions
+public sealed class YarpIngressOptions
 {
     public bool Https { get; set; }
     public List<Dictionary<string,string>> Transforms { get; set; }

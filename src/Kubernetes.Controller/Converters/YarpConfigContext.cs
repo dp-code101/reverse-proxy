@@ -7,7 +7,7 @@ using Yarp.ReverseProxy.Configuration;
 
 namespace Yarp.Kubernetes.Controller.Converters;
 
-internal class YarpConfigContext
+public class YarpConfigContext
 {
     public Dictionary<string, ClusterTransfer> ClusterTransfers { get; set; } = new Dictionary<string, ClusterTransfer>();
     public List<RouteConfig> Routes { get; set; } = new List<RouteConfig>();
