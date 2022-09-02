@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -68,7 +69,7 @@ internal sealed class ForwarderMiddleware
 
         try
         {
-            _requestCounter.Increment(cluster, destination);
+            _requestCounter.Increment(cluster, destination, context.RequestAborted);
 
             ForwarderTelemetry.Log.ForwarderInvoke(cluster.ClusterId, route.Config.RouteId, destination.DestinationId);
 
@@ -78,7 +79,7 @@ internal sealed class ForwarderMiddleware
         }
         finally
         {
-            _requestCounter.Decrement(destination, cluster);
+            _requestCounter.Decrement(destination, cluster, context.RequestAborted.IsCancellationRequested ? CancellationToken.None : context.RequestAborted);
         }
     }
 
